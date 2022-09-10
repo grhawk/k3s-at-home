@@ -1,0 +1,62 @@
+---
+- name: Fail when my_var is not defined
+  debug:
+    msg: >-
+      'op_credentials and op-token are required. Add the following to the playbook run:
+      -e "{\"op_credentials\": $(op item  --vault k3s@home get futvbd4kp7w6pepetdgywalf4a --fields label=base64),
+      \"op_token\": $(op item --vault k3s@home get 6yonwwnglgftz7i3adm22b456q --fields label=base64)}"'
+  failed_when: op_credentials is not defined or op_token is not defined
+
+- name: Use my own repo until the ufficial one is fixed
+  ansible.builtin.git:
+    repo: 'https://github.com/grhawk/connect-helm-charts.git'
+    dest: /tmp/connect-helm-chart
+    clone: yes
+    update: yes
+    depth: 1
+
+- name: Ensure the nginx/stable helm repo is available
+  kubernetes.core.helm_repository:
+    name: 1password
+    repo_url: https://1password.github.io/connect-helm-charts
+    state: present
+
+- name: Make sure the 1password-system ns exists
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    api_version: v1
+    kind: Namespace
+    name: 1password-system
+
+
+- name: Make sure the op-credentials is in the namespace
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: 1password-system
+    definition: "{{ lookup('template', '../templates/op-credentials-secret.yml') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+  no_log: true
+
+- name: Make sure the op-token-secret is in the namespace
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: 1password-system
+    definition: "{{ lookup('template', '../templates/op-token-secret.yml') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+  no_log: false
+
+- name: Ensure vault (1password-server) is installed
+  kubernetes.core.helm:
+    name: vault
+    chart_ref: /tmp/connect-helm-chart/charts/connect
+    release_namespace: 1password-system
+    release_state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    create_namespace: yes
+    wait: yes
+    release_values: "{{ lookup('file', '../files/1password-values.yml') | from_yaml }}"

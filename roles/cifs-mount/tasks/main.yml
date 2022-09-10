@@ -1,0 +1,24 @@
+---
+- name: Ensure CIFS packages are installed
+  apt:
+    name:
+      - cifs-utils
+    state: present
+
+- name: Create mountpoint
+  file:
+    path: /mnt/external
+    state: directory
+    mode: 0755
+  notify: reboot
+
+- name: mount share
+  mount:
+    state: "mounted"
+    fstype: "cifs"
+    name: /mnt/external/
+    src: "//internetbox-nas/ExtremeSSD"
+    opts: "guest,file_mode=0644,dir_mode=0755,gid=root,uid=root"
+
+- name: Flush Handlers
+  meta: flush_handlers

@@ -1,0 +1,8 @@
+---
+server: "https://{{ hostvars[groups['main_master'][0]]['ansible_default_ipv4']['address']}}:6443"
+token: "{{ hostvars[groups['main_master'][0]]['token'] | b64decode | regex_replace('\n', '') }}"
+disable:
+  - traefik
+  - servicelb
+  - local-storage
+write-kubeconfig-mode: 644

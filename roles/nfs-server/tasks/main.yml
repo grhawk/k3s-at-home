@@ -1,0 +1,59 @@
+---
+# tasks file for nfs-server
+
+- name: Ensure NFS packages are installed
+  apt:
+    name:
+      - nfs-common
+      - nfs-kernel-server
+    state: present
+
+- name: Ensure directories to export exit
+  file:
+    path: "{{ item.strip().split() [0] }}"
+    state: directory
+  with_items: "{{ nfs_exports }}"
+
+- name: Mount disk uuid at mountpoint for the nfs export
+  mount:
+    path: "{{ item.strip().split() [1] }}"
+    src: LABEL="{{ item.strip().split() [0] }}"
+    fstype: ext4
+    state: present
+  with_items: "{{mount_disks}}"
+
+- name: Change permissions to the mounted folder
+  file:
+    path: "{{item.strip().split() [1] }}"
+    mode: '0777'
+  with_items: "{{mount_disks}}"
+
+- name: Copy exports file
+  template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload nfs
+
+- name: Ensure the file /etc/krb5.keytab is not required by RPC
+  lineinfile:
+    path: /lib/systemd/system/rpc-gssd.service
+    state: absent
+    line: ConditionPathExists=/etc/krb5.keytab
+  notify: reboot
+
+- name: Flush Handlers
+  meta: flush_handlers
+
+- name: Ensure nfs is running
+  service:
+    name: nfs-kernel-server
+    state: started
+    enabled: yes
+  when:
+    nfs_exports|length
+
+- name: Flush Handlers
+  meta: flush_handlers

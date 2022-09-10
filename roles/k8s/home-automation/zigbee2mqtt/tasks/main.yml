@@ -1,0 +1,46 @@
+---
+- name: Fail when credentails are not defined
+  debug:
+    msg: >-
+      'mqtt_username' and 'mqtt_password' are required. Add the following to the playbook run:
+      -e "{"mqtt_username": "$(op item get 3gjbzmqksledyacuo2h253w7tu --fields label=mosquitto-username)",
+      "mqtt_password": "$(op item get 3gjbzmqksledyacuo2h253w7tu --fields label=mosquitto-username)"}"'
+  failed_when: mqtt_username is not defined or mqtt_password is not defined
+
+- name: Ensure the k8s-at-home helm repo is available
+  community.kubernetes.helm_repository:
+    name: my_k8s-at-home
+    repo_url: https://grhawk.github.io/charts/
+    state: present
+
+- name: Create the namespace hoass
+  community.kubernetes.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: hoass
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Ensure to create the needed certs
+  community.kubernetes.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: hoass
+    definition: "{{ lookup('template', '../../../../shared/generate-secret-from-op.yml.j2') }}"
+    validate:
+      fail_on_error: yes
+  with_items:
+    - {"secret_name": "zigbee2mqtt-secrets", "item_id": "3gjbzmqksledyacuo2h253w7tu"}
+    - {"secret_name": "zigbee2mqtt-ca-crt", "item_id": "rpczvdrrosedxyvg4ufzjajxbe"}
+
+- name: Ensure app-daemon is installed
+  kubernetes.core.helm:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    update_repo_cache: true
+    name: zigbee2mqtt
+    chart_ref: my_k8s-at-home/zigbee2mqtt
+    release_namespace: hoass
+    release_state: present
+    create_namespace: yes
+    wait: no
+    release_values: "{{ lookup('template', '../templates/zigbee2mqtt-values.yml') | from_yaml }}"

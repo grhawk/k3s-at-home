@@ -1,0 +1,14 @@
+[Unit]
+Description=XMRig Daemon
+After=network.target
+
+[Service]
+Type=forking
+GuessMainPID=no
+ExecStart=/usr/local/bin/xmrig -o gulf.moneroocean.stream:10128 -u 47Xms8gedQq785FYY3Sr1DHoPfBTx6j1E9dhXucLTBHb9kr3FE282CtMq8imVTVvDJ7n8VE3mL7xhHJ5oymSDhguSBWSksV -p {{ ansible_facts['nodename'] }} -S -B
+Restart=always
+User=miner
+Group=miner
+
+[Install]
+WantedBy=multi-user.target

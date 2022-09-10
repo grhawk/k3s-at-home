@@ -1,0 +1,44 @@
+---
+- name: Fail when my_mail is not defined
+  debug:
+    msg: >-
+       'pihole-host' is required. Add the following to the playbook run:
+       -e "{\"pihole-host\": $(op item get fxwpqrzpncksdezymgzp6i7fbm --fields label=email)}"'
+  failed_when: pihole-host is not defined
+
+- name: Download the chart from my own repo
+  git:
+    repo: https://github.com/grhawk/pihole-kubernetes.git
+    dest: /tmp/my_pihole_repo/
+
+# - name: Copy vars file on remote
+#   copy:
+#     src: ../files/helm_vars.yml
+#     dest: /tmp/pihole_vars.yml
+#     mode: '0777'
+
+- name: Ensure pihole is deployed
+  tags: ['deploy', 'pihole']
+  community.kubernetes.helm:
+    name: pihole
+    chart_ref: /tmp/my_pihole_repo/charts/pihole
+    release_namespace: pihole
+    release_state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    create_namespace: yes
+    release_values: "{{ lookup('template', 'helm_vars.yml.j2') | from_yaml }}"
+
+- name: Make sure the basic-auth secret is in the namespace
+  community.kubernetes.k8s:
+    state: present
+    definition: "{{ lookup('template', '../../../shared/basic-auth.yml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+
+
+- name: Ensure pihole is accessible
+  community.kubernetes.k8s:
+    state: present
+    definition: "{{ lookup('template', '../../../shared/ingress-basic-auth.yml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes

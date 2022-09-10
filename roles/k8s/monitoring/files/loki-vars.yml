@@ -1,0 +1,25 @@
+---
+grafana:
+  enabled: false
+  sidecar:
+    datasources:
+      enabled: true
+
+prometheus:
+  enabled: false
+
+loki:
+  persistence:
+    enabled: true
+    size: 5Gi
+    scrape_configs:
+      - job_name: auth
+        journal:
+          json: false
+          max_age: 12h
+          path: /var/log/auth
+          labels:
+            job: auth
+            relabel_configs:
+              - source_labels: ['__journal__systemd_unit']
+                target_label: 'unit'

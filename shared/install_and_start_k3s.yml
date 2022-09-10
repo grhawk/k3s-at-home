@@ -1,0 +1,36 @@
+---
+- name: Create the k3s config folder
+  become: true
+  file:
+    path: /etc/rancher/k3s
+    state: directory
+    owner: root
+    mode: "u=rwx,g=rx,o=rx"
+
+- name: Copy K3s config file
+  template:
+    src: "k3s-config.yml.j2"
+    dest: "/etc/rancher/k3s/config.yaml"
+    owner: root
+    group: root
+    mode: 0644
+  register: k3s_config
+
+- name: Download the k3s install script
+  get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s-install-script.sh
+    mode: 755
+  register: downloaded_new_k3s_binary
+
+- name: Install the k3s service
+  shell: /tmp/k3s-install-script.sh
+  when: downloaded_new_k3s_binary.changed
+
+- name: Enable, restart and check K3s service
+  systemd:
+    name: k3s
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  when: downloaded_new_k3s_binary.changed or k3s_config.changed

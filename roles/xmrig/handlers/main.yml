@@ -1,0 +1,12 @@
+---
+- name: Start xmrig
+  systemd:
+    name: xmrig
+    state: started
+    enabled: yes
+
+- name: Restart xmrig
+  systemd:
+    name: xmrig
+    state: restarted
+    enabled: yes

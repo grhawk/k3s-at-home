@@ -1,0 +1,204 @@
+---
+# Disable etcd monitoring. See https://github.com/cablespaghetti/k3s-monitoring/issues/4
+kubeEtcd:
+  enabled: false
+
+# Disable kube-controller-manager and kube-scheduler monitoring. See https://github.com/cablespaghetti/k3s-monitoring/issues/2
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+
+nodeExporter:
+  enabled: true
+
+defaultRules:
+  create: true
+  rules:
+    kubeProxy: false
+
+additionalPrometheusRulesMap:
+  rule-name:
+    groups:
+      - name: node_performances.rules
+        rules:
+          - alert: RaspBurning
+            annotations:
+              title: Raspberry pi {{ $labels.instance }} is burning!
+            expr: avg by (instance) (avg_over_time(node_hwmon_temp_celsius[30s])) > 75
+            for: 5m
+            labels:
+              severity: critical
+          - alert: RaspScaling
+            annotations:
+              title: Raspberry pi {{ $labels.instance }} is scaling down!
+              description: Probably it is too hot!
+            expr: min by (instance, cpu) (min_over_time(node_cpu_scaling_frequency_max_hertz[5m])) < 1500000000
+            for: 5m
+            labels:
+              severity: high
+
+
+alertmanager:
+  config:
+    global:
+      slack_api_url: '<url>'
+      smtp_from: you@gmail.com
+      smtp_smarthost: mailhog:1025
+      smtp_require_tls: false
+    route:
+      group_by: ['alertname', 'cluster', 'job', 'env']
+      repeat_interval: 1m
+      group_interval: 10s
+      # capture All Dev + All INFO
+      receiver: 'ilert.web.hook'
+      routes:
+        - match:
+            severtiy: info
+          receiver: null
+        # capture All WARN to the 'warning' with P3
+        - match:
+            alertname: Watchdog
+          receiver: 'ilert.heartbeat.web.hook'
+          # capture All CRIT to the 'critical' with P1
+        - match:
+            alertname: Watchdog
+          receiver: 'null'
+
+    receivers:
+      - name: 'null'
+      - name: email
+        email_configs:
+          - send_resolved: true
+            to: youremail@gmail.com
+      - name: 'slack-notification'
+        slack_configs:
+          - channel: '#alerts'
+            send_resolved: true
+            icon_url: https://avatars3.githubusercontent.com/u/3380462
+            # text: '{{ tpl (template "slack_template.tmpl") }}'
+      - name: 'ilert.web.hook'
+        webhook_configs:
+          - url: "{{ prometheus_webhook }}"
+      - name: 'ilert.heartbeat.web.hook'
+        webhook_configs:
+          - url: "{{ prometheus_heartbeat }}"
+
+    templates:
+      - '/etc/alertmanager/config/*.tmpl'
+
+    # Inhibition rules allow to mute a set of alerts given that another alert is firing.
+    # We use this to mute any warning-level notifications if the same alert is already critical.
+    inhibit_rules:
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      # Apply inhibition if the alertname is the same.
+      equal: ['alertname', 'namespace']
+
+#  tplConfig: true
+
+  templateFiles:
+    slack_template.tmpl: |-
+      {{ define "cluster" }}{{ .ExternalURL | reReplaceAll ".*alertmanager\\.(.*)" "$1" }}{{ end }}
+      {{ define "slack.myorg.text" }}
+      {{- $root := . -}}
+      {{ range .Alerts }}
+      *Alert:* {{ .Annotations.summary }} - `{{ .Labels.severity }}`
+      *Cluster:* {{ template "cluster" $root }}
+      *Description:* {{ .Annotations.description }}
+      *Graph:* <{{ .GeneratorURL }}|:chart_with_upwards_trend:>
+      *Runbook:* <{{ .Annotations.runbook }}|:spiral_note_pad:>
+      *Details:*
+      {{ range .Labels.SortedPairs }} - *{{ .Name }}:* `{{ .Value }}`
+      {{ end }}
+      {{ end }}
+      {{ end }}
+
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: basic-auth
+      nginx.ingress.kubernetes.io/auth-realm: Authentication Required - foo
+
+    hosts:
+      - monitoring.riccardopetraglia.me
+    paths:
+      - /alertmanager
+    pathType: Prefix
+
+    tls:
+      - secretName: alertmanager-general-tls
+        hosts:
+          - monitoring.riccardopetraglia.me
+
+  alertmanagerSpec:
+    replicas: 2
+    podAntiAffinity: "soft"
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 64Mi
+      requests:
+        cpu: 25m
+        memory: 32Mi
+      # priorityClassName: high-priority
+
+prometheus:
+  prometheusSpec:
+    retention: 5d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+
+
+    replicas: 1
+    podAntiAffinity: "hard"
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi
+      requests:
+        cpu: 100m
+        memory: 2Gi
+      # priorityClassName: high-priority
+#
+#  service:
+#    sessionAffinity: "ClientIP"
+#
+
+## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+##
+grafana:
+  enabled: false
+  namespaceOverride: ""
+
+  ## ForceDeployDatasources Create datasource configmap even if grafana deployment has been disabled
+  ##
+  forceDeployDatasources: true
+
+  ## ForceDeployDashboard Create dashboard configmap even if grafana deployment has been disabled
+  ##
+  forceDeployDashboards: true
+
+  ## Deploy default dashboards
+  ##
+  defaultDashboardsEnabled: true

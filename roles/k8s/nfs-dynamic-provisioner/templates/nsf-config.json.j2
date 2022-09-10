@@ -1,0 +1,5 @@
+nfs:
+  server: {{ ansible_facts.default_ipv4.address }}
+  path: /mnt/exported
+storageClass:
+ defaultClass: true

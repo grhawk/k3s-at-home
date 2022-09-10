@@ -1,0 +1,15 @@
+---
+- name: Install packages required by k8s deployments
+  apt:
+    name:
+      - open-iscsi
+      - nfs-common
+      - nfs-kernel-server
+    state: present
+
+- name: Install basic python packages required by some ansible modules
+  pip:
+    name:
+      - kubernetes-validate
+      - openshift
+    state: present

@@ -1,0 +1,98 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+  roles:
+    - role: common
+      tags: ['common']
+    # - role: cifs-mount
+    #   tags: ['k8s', 'backup-partition', 'cifs']
+
+
+- hosts: nfs_servers
+  gather_facts: yes
+  become: yes
+  vars:
+    - mount_disks:
+        - "ExtHd0 /mnt/external"
+    - nfs_exports:
+        - "/mnt/external *(rw,sync,no_root_squash,no_subtree_check)"
+    - nfs_rpcbind_state: stopped
+    - nfs_rpcbind_enable: false
+  roles:
+    - role: nfs-server
+      tags: ['nfs-server', 'nfs']
+
+- hosts: k8s_nodes
+  gather_facts: yes
+  become: yes
+  tags: ['k3s-install', 'k8s-common']
+  roles:
+    - role: k3s/common
+
+- hosts: main_master
+  gather_facts: yes
+  become: yes
+  tags: ['k3s-install']
+  roles:
+    - role: k3s/k3s-init
+    - role: k3s/main_master
+
+- hosts: secondary_masters
+  gather_facts: yes
+  become: yes
+  tags: ['k3s-install']
+  roles:
+    - role: k3s/k3s-init
+    - role: k3s/secondary-masters
+
+- hosts: workers
+  become: yes
+  tags: ['k3s-install']
+  roles:
+    - role: k3s/k3s-init
+    - role: k3s/node
+
+
+- hosts: k8s
+  tags: ['k8s-depl']
+  gather_facts: yes
+  become: yes
+  environment:
+    - K8S_AUTH_KUBECONFIG: /home/pi/.kube/config
+  roles:
+    - role: k8s/helm
+    - role: k8s/vault
+      tags: ['k8s', '1password', 'vault']
+    - role: k8s/longhorn
+      tags: ['k8s', 'longhorn']
+    - role: k8s/metalLb
+      tags: ['k8s', 'metallb']
+    - role: k8s/nginx
+      tags: ['k8s', 'nginx']
+    # - role: k8s/nfs-dynamic-provisioner
+    #   tags: ['k8s', 'nfs-dynamic-provisioner']
+    - role: k8s/cert-manager
+      tags: ['k8s', 'cert-manager']
+    # - role: k8s/pihole
+    #   tags: ['k8s', 'pihole']
+    - role: k8s/monitoring
+      tags: ['k8s', 'grafana', 'prometheus', 'loki', 'monitoring']
+    - role: k8s/home-automation/hoass
+      tags: ['k8s', 'home-automation', 'hoass']
+    - role: k8s/home-automation/node-red
+      tags: ['k8s', 'home-automation', 'nodered']
+    - role: k8s/home-automation/appdaemon
+      tags: ['k8s', 'home-automation', 'appdaemon']
+    - role: k8s/home-automation/zigbee2mqtt
+      tags: ['k8s', 'home-automation', 'zigbee2mqtt']
+    - role: k8s/home-automation/mosquitto
+      tags: ['k8s', 'home-automation', 'mosquitto']
+
+
+- hosts: miners
+  tags: ['miners', 'xmrig']
+  gather_facts: yes
+  become: yes
+  roles:
+    - xmrig

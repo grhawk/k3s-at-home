@@ -1,0 +1,6 @@
+---
+ingress_name: pihole
+namespace: pihole
+host: "{{ pihole-host }}"
+service: pihole-web
+port: 80

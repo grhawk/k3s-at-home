@@ -1,0 +1,32 @@
+---
+- name: Ensure the k8s-at-home helm repo is available
+  community.kubernetes.helm_repository:
+    name: k8s-at-home
+    repo_url: https://k8s-at-home.com/charts/
+    state: present
+
+- name: Ensure node-red is installed
+  kubernetes.core.helm:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: node-red
+    chart_ref: k8s-at-home/node-red
+    release_namespace: node-red
+    release_state: present
+    create_namespace: yes
+    wait: no
+    release_values: "{{ lookup('file', '../files/nodered-values.yml') | from_yaml }}"
+
+- name: Delete node-red deployment
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: absent
+    api_version: v1
+    kind: Deployment
+    namespace: node-red
+    name: node-red
+
+- name: Recreated node-red deployment with init-container
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition: "{{ lookup('file', '../files/nodered-deployment.yml') | from_yaml }}"

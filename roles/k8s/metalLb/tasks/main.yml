@@ -1,0 +1,63 @@
+---
+- name: Ensure the nginx/stable helm repo is available
+  kubernetes.core.helm_repository:
+    name: metallb
+    repo_url: https://metallb.github.io/metallb
+    state: present
+
+- name: Ensure metalLb is installed
+  kubernetes.core.helm:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: metallb
+    chart_ref: metallb/metallb
+    release_namespace: metallb-system
+    release_state: present
+    create_namespace: yes
+    wait: yes
+    release_values: "{{ lookup('file', '../files/metalLb-values.yml') | from_yaml }}"
+
+- name: Create the IpAddressPool config map default (~ 10.1.10.250/28)
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: metallb-system
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: IPAddressPool
+      metadata:
+        name: default-lb-pool
+      spec:
+        addresses:
+          - 10.1.10.241 - 10.1.10.254
+
+- name: Create the special IpAddressPool
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: metallb-system
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: IPAddressPool
+      metadata:
+        name: special-lb-pool
+      spec:
+        addresses:
+          - 10.1.10.100/32  # masters LB
+          - 10.1.10.200/32  # nginx LB
+          - 10.1.10.201/32  # pihole
+        autoassign: false
+
+- name: Create the L2Advertisement for metalLb
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: metallb-system
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: L2Advertisement
+      metadata:
+        name: l2advertisement
+      spec:
+        ipAddressPools:
+          - default-lb-pool
+          - special-lb-pool

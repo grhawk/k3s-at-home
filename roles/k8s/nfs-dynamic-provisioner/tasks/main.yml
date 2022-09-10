@@ -1,0 +1,43 @@
+---
+- name: Ensure that python3-yaml is installed (needed by the helm deployment)
+  apt:
+    name: python3-yaml
+    state: present
+
+- name: Ensure the python-openshift module is installed (needed by k8s)
+  pip:
+    name: openshift
+    state: present
+
+- name: Ensure the dymaic provisioner helm repo is available
+  community.kubernetes.helm_repository:
+    name: nfs-subdir-external-provisioner
+    repo_url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+    state: present
+
+# - name: Ensure local-path storageClass is not default
+#   community.kubernetes.k8s:
+#     kubeconfig: /etc/rancher/k3s/k3s.yaml
+#     definition:
+#       apiVersion: storage.k8s.io/v1
+#       kind: StorageClass
+#       metadata:
+#         annotations:
+#           objectset.rio.cattle.io/id: ""
+#           objectset.rio.cattle.io/owner-gvk: k3s.cattle.io/v1, Kind=Addon
+#           objectset.rio.cattle.io/owner-name: local-storage
+#           objectset.rio.cattle.io/owner-namespace: kube-system
+#           storageclass.kubernetes.io/is-default-class: "false"
+#         name: local-path
+#     state: present
+
+- name: Ensure the helm chart for the dynamic provisioner is deployed
+  community.kubernetes.helm:
+    name: nfs-subdir-external-provisioner
+    chart_ref: nfs-subdir-external-provisioner
+    release_namespace: nfs-dyn-prov
+    release_state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    chart_repo_url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+    create_namespace: yes
+    release_values: "{{ lookup('template', '../templates/nsf-config.json.j2') | from_yaml }}"

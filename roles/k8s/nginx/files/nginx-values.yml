@@ -1,0 +1,14 @@
+---
+controller:
+  # hostNetwork: true
+  # containerPort:
+  #   http: 10080
+  #   https: 10443
+  service:
+    loadBalancerIp: 10.1.10.200
+    externalTrafficPolicy: Local
+    annotations:
+      metallb.universe.tf/address-pool: special-lb-pool
+      metallb.universe.tf/loadBalancerIPs: 10.1.10.200
+  metrics:
+    enabled: true

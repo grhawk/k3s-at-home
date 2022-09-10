@@ -1,0 +1,17 @@
+---
+- name: Ensure the k8s-at-home helm repo is available
+  community.kubernetes.helm_repository:
+    name: k8s-at-home
+    repo_url: https://k8s-at-home.com/charts/
+    state: present
+
+- name: Ensure app-daemon is installed
+  kubernetes.core.helm:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: app-daemon
+    chart_ref: k8s-at-home/appdaemon
+    release_namespace: hoass
+    release_state: present
+    create_namespace: yes
+    wait: no
+    release_values: "{{ lookup('file', '../files/appdaemon-values.yml') | from_yaml }}"

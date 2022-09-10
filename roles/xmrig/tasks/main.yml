@@ -1,0 +1,84 @@
+---
+- name: Install dependencies
+  apt:
+    package:
+      - git
+      - build-essential
+      - cmake
+      - libuv1-dev
+      - libssl-dev
+      - libhwloc-dev
+    state: present
+
+- name: create xmrig group
+  group:
+    name: miner
+    state: present
+
+- name: create xmrig user
+  user:
+    name: miner
+    groups: miner
+    shell: /sbin/nologin
+    append: yes
+    state: present
+    create_home: no
+
+- name: copy systemd file to server
+  template:
+    src: xmrig.service.j2
+    dest: /etc/systemd/system/xmrig.service
+    owner: root
+    group: root
+  notify:
+    - Start xmrig
+
+- name: download binary soruce from git
+  git:
+    repo: https://github.com/xmrig/xmrig.git
+    dest: /tmp/xmrig
+    depth: 1
+    update: yes
+    single_branch: yes
+    version: master
+  register: gitclone
+
+- name: Create folder system for xmrig compilation
+  file:
+    path: /tmp/xmrig-build
+    state: directory
+
+- name: Check if xmrig has already been compiled
+  stat:
+    path: /tmp/xmrig-build/xmrig
+  register: xmrig_bin
+
+- name: CMake xmrig
+  command:
+    chdir: /tmp/xmrig-build
+    cmd: cmake /tmp/xmrig
+  register: cmake_cmd
+  when: gitclone.changed or xmrig_bin.stat.exists == false
+  failed_when: cmake_cmd.rc != 0
+
+- name: Compile xmrig
+  command:
+    chdir: /tmp/xmrig-build
+    cmd: make -j 4
+  register: make_cmd
+  when: gitclone.changed or xmrig_bin.stat.exists == false
+  failed_when: make_cmd.rc != 0
+
+- name: Copy binary to /usr/local/bin
+  copy:
+    src: /tmp/xmrig-build/xmrig
+    remote_src: yes
+    dest: /usr/local/bin
+    mode: 0755
+    owner: root
+    group: root
+  notify:
+    - Restart xmrig
+
+- name: Flush Handlers
+  meta: flush_handlers

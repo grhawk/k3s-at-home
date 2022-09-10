@@ -1,0 +1,6 @@
+---
+ingress_name: grafana
+namespace: monitoring
+host: grafana.riccardopetraglia.me
+service: grafana
+port: 80

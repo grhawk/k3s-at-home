@@ -1,0 +1,26 @@
+---
+- name: Upgrade all packages installed in the pi
+  apt:
+    upgrade: safe
+    update_cache: yes
+    install_recommends: no
+    autoclean: yes
+
+- name: Set the timezone
+  ansible.builtin.command:
+    "timedatectl set-timezone Europe/Zurich"
+
+
+- name: Install basic packages
+  apt:
+    name:
+      - vim
+      - ntp
+      - htop
+      - emacs-nox
+      - tcpdump
+      - python3-pip
+      - python3-yaml
+      - git
+    state: present
+  notify: reboot

@@ -1,0 +1,21 @@
+---
+
+- name: Ensure helm key is installed
+  apt_key:
+    url: https://baltocdn.com/helm/signing.asc
+    state: present
+
+- name: Ensure helm repo is installed
+  apt_repository:
+    repo: deb https://baltocdn.com/helm/stable/debian/ all main
+    state: present
+
+- name: Ensure required packages for Helm are installed
+  apt:
+    name: apt-transport-https
+    state: present
+
+- name: Ensure Helm is installed
+  apt:
+    name: helm
+    state: present

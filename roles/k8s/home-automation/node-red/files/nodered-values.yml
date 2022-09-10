@@ -1,0 +1,23 @@
+---
+env:
+  # -- Set the container timezone
+  TZ: "Europe/Zurich"
+
+# -- Configure persistence settings for the chart under this key.
+# @default -- See values.yaml
+persistence:
+  config:
+    enabled: true
+    mountPath: /data
+    readOnly: false
+    accessMode: ReadWriteOnce
+    type: pvc
+
+    # -- Configure a hostPathMount to mount a USB device in the container.
+  # @default -- See values.yaml
+  # usb:
+  #   enabled: false
+  #   type: hostPath
+  #   hostPath: /path/to/device
+
+

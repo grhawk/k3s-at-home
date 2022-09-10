@@ -1,0 +1,6 @@
+---
+- name: reload nfs
+  command: 'exportfs -ra'
+
+- name: reboot
+  reboot:

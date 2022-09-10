@@ -1,0 +1,28 @@
+---
+# Default values for longhorn.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+service:
+  ui:
+    type: NodePort
+    nodePort: 30201
+  manager:
+    type: ClusterIP
+    nodePort: ""
+
+persistence:
+  defaultClass: true
+  defaultFsType: ext4
+  defaultClassReplicaCount: 3
+  reclaimPolicy: Delete
+  recurringJobSelector:
+    enable: true
+    jobList: []
+  backingImage:
+    enable: true
+
+
+defaultSettings:
+  backupTarget: nfs://10.1.10.101:/mnt/external
+  defaultReplicaCount: 2

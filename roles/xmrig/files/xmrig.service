@@ -1,0 +1,14 @@
+[Unit]
+Description=XMRig Daemon
+After=network.target
+
+[Service]
+Type=forking
+GuessMainPID=no
+ExecStart=/usr/local/bin/xmrig -o gulf.moneroocean.stream:10128 -u xmrig-note  -p master-01 -S -B
+Restart=always
+User=miner
+Group=miner
+
+[Install]
+WantedBy=multi-user.target

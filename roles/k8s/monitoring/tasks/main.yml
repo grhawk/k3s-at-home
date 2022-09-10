@@ -1,0 +1,92 @@
+---
+- name: Fail when my_var is not defined
+  debug:
+    msg: >-
+      'prometheus_webhook' and 'prometheus_heartbeat' are required. Add the following to the playbook run:
+      -e '{"prometheus_webhook": "$(op  --vault k3s@home item get owdhh7g2bq4oyyjknal4bwoln4 --fields label=prometheus-webhook)", "prometheus_heartbeat": "$(op  --vault k3s@home item get owdhh7g2bq4oyyjknal4bwoln4 --fields label=prometheus-heartbeat)"}'
+  failed_when: prometheus_webhook is not defined or prometheus_heartbeat is not defined
+
+
+# - name: Fail when my_var is not defined
+#   debug:
+#     msg: >-
+#       'prometheus-webhook' and 'prometheus-heartbeat' are required. Add the following to the playbook run:
+#       -e '"prometheus-heartbeat": "$(op  --vault k3s@home item get owdhh7g2bq4oyyjknal4bwoln4 --fields label=prometheus-heartbeat)"'
+#   failed_when: prometheus_heartbeat is not defined
+
+
+- name: Ensure the community-prometheus helm repo is available
+  community.kubernetes.helm_repository:
+    name: prometheus-community
+    repo_url: https://prometheus-community.github.io/helm-charts
+    state: present
+
+# To UNINSTALL it, make sure to read
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#configuration
+- name: Ensure the helm chart for prometheus is deployed
+  community.kubernetes.helm:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: prometheus
+    chart_ref: prometheus-community/kube-prometheus-stack
+    release_namespace: monitoring
+    release_state: present
+    create_namespace: yes
+    release_values: "{{ lookup('file', '../files/prometheus-vars.yml') | from_yaml }}"
+
+- name: Ensure the grafana helm repo is available
+  community.kubernetes.helm_repository:
+    name: grafana
+    repo_url: https://grafana.github.io/helm-charts
+    state: present
+
+- name: Install the loki
+  community.kubernetes.helm:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: loki
+    chart_ref: grafana/loki-stack
+    release_namespace: monitoring
+    release_state: present
+    create_namespace: yes
+    release_values: "{{ lookup('file', '../files/loki-vars.yml') | from_yaml }}"
+
+# - name: Create the secret credentials for grafana
+#   community.kubernetes.k8s:
+#     kubeconfig: /etc/rancher/k3s/k3s.yaml
+#     state: present
+#     definition: "{{ lookup('file', '../files/grafana-credentials.yml') | from_yaml }}"
+#     validate:
+#       fail_on_error: yes
+
+- name: Install grafana
+  community.kubernetes.helm:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: grafana
+    chart_ref: grafana/grafana
+    release_namespace: monitoring
+    release_state: present
+    create_namespace: yes
+    release_values: "{{ lookup('file', '../files/grafana-vars.yml') | from_yaml }}"
+
+- name: Make sure the basic-auth secret is in the namespace
+  community.kubernetes.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition: "{{ lookup('template', '../../../shared/basic-auth.yml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+
+
+# - name: Ensure prometheus is accessible
+#   community.kubernetes.k8s:
+#     state: present
+#     definition: "{{ lookup('template', '../../../shared/ingress-basic-auth.yml.j2') | from_yaml }}"
+#     validate:
+#       fail_on_error: yes
+
+- name: Deploy the serviceMonitor for nginx
+  community.kubernetes.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition: "{{ lookup('file', '../files/nginx-serviceMonitor.yml') | from_yaml }}"
+    validate:
+      fail_on_error: yes
