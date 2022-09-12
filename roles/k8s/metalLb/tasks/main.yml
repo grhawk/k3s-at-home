@@ -14,7 +14,9 @@
     release_state: present
     create_namespace: yes
     wait: yes
+    timeout: 600s
     release_values: "{{ lookup('file', '../files/metalLb-values.yml') | from_yaml }}"
+  notify: check_kube_api
 
 - name: Create the IpAddressPool config map default (~ 10.1.10.250/28)
   kubernetes.core.k8s:

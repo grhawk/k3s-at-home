@@ -39,6 +39,8 @@
     - role: k3s/main_master
 
 - hosts: secondary_masters
+  # This cannot really be done alone since we need the token from the previous
+  # role.
   gather_facts: yes
   become: yes
   tags: ['k3s-install']

@@ -16,3 +16,4 @@
     wait: yes
     wait_timeout: 600s
     release_values: "{{ lookup('file', '../files/nginx-values.yml') | from_yaml }}"
+  notify: check_kube_api

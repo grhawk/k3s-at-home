@@ -29,7 +29,6 @@
     kind: Namespace
     name: 1password-system
 
-
 - name: Make sure the op-credentials is in the namespace
   kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
@@ -60,3 +59,4 @@
     create_namespace: yes
     wait: yes
     release_values: "{{ lookup('file', '../files/1password-values.yml') | from_yaml }}"
+  notify: check_kube_api

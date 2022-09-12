@@ -28,3 +28,4 @@
     wait: yes
     timeout: 600s
     release_values: "{{ lookup('file', '../files/values.yml') | from_yaml }}"
+  notify: check_kube_api
