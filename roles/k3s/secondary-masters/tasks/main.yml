@@ -52,9 +52,24 @@
     dest: /usr/local/bin/crictl
     state: link
 
-- name: Make sure the kubeapi is reachable using a lb
-  community.kubernetes.k8s:
+- name: debugging
+  debug:
+    msg: "{{ lookup('template', '../templates/kubeapi-ep.yml.j2') }}"
+
+- name: Create the kubeapi-lb endpoint
+  kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    definition: |
-      "{{ lookup('template', '../templates/kubeapi-lb.yml') | from_yaml }}"
+    namespace: kube-public
+    definition: "{{ lookup('template', '../templates/kubeapi-ep.yml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+
+
+- name: Make sure the kubeapi is reachable using a lb
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition: "{{ lookup('template', '../templates/kubeapi-lb.yml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes

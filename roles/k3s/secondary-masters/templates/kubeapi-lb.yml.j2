@@ -12,16 +12,3 @@ spec:
     - port: 6443
       targetPort: 6443
   type: LoadBalancer
----
-apiVersion: v1
-kind: Endpoints
-metadata:
-  name: kubernetes-lb
-  namespace: kube-public
-subsets:
-  - addresses:
-      {% for host in groups['mainnodes'] %}
-      - ip: {{hostvars[host]['ansible_ssh_host']}}
-      {% endfor %}
-    ports:
-      - port: 6443
