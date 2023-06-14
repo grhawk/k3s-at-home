@@ -1,4 +1,7 @@
 ---
 - include_tasks: prereq.yml
 - include_tasks: raspbian.yml
-  when: ansible_facts.architecture == "aarch64"
+  when:
+    - ansible_user == "pi"
+- include_tasks: dietpi.yml
+  when: ansible_user == "dietpi"

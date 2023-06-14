@@ -4,7 +4,7 @@
   become: yes
   roles:
     - role: common
-      tags: ['common']
+      tags: ['common', 'k3s-install']
     # - role: cifs-mount
     #   tags: ['k8s', 'backup-partition', 'cifs']
 
@@ -61,11 +61,12 @@
   gather_facts: yes
   become: yes
   environment:
-    - K8S_AUTH_KUBECONFIG: /home/pi/.kube/config
+    - K8S_AUTH_KUBECONFIG: /home/{{ansible_user}}/.kube/config
   roles:
     - role: k8s/helm
+      tags: ['k8s', '1password', 'vault', 'longhorn']
     - role: k8s/vault
-      tags: ['k8s', '1password', 'vault']
+      tags: ['k8s', '1password', 'vault', 'longhorn']
     - role: k8s/longhorn
       tags: ['k8s', 'longhorn']
     - role: k8s/metalLb

@@ -1,6 +1,6 @@
 ---
 k3s:
-  version: v1.24.2+k3s2
-  kube_api_lb_ip: "10.1.10.100"
+  version: v1.27.2+k3s1
+  kube_api_lb_ip: "10.1.10.201"
   server_location: /var/lib/rancher/k3s
   extra_agent_args: ""

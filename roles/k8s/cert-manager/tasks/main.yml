@@ -49,6 +49,6 @@
 - name: Make sure the cert-manager cluster-issuer is deployed
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
-    definition: "{{ lookup('file', '../files/cluster-issuer.yml') | from_yaml }}"
+    definition: "{{ lookup('template', '../templates/cluster-issuer.yml') }}"
     state: present
     namespace: cert-manager

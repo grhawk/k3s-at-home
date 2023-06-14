@@ -1,3 +1,5 @@
 ---
 - name: reboot
   reboot:
+    msg: "Reboot initiated by Ansible"
+    reboot_command: "sudo reboot"

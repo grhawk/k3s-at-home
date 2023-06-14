@@ -1,4 +1,8 @@
 ---
+- name: Set the timezone
+  ansible.builtin.command:
+    "timedatectl set-timezone Europe/Zurich"
+
 - name: Activating cgroup support
   lineinfile:
     path: /boot/cmdline.txt

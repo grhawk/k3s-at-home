@@ -6,11 +6,6 @@
     install_recommends: no
     autoclean: yes
 
-- name: Set the timezone
-  ansible.builtin.command:
-    "timedatectl set-timezone Europe/Zurich"
-
-
 - name: Install basic packages
   apt:
     name:
@@ -22,5 +17,6 @@
       - python3-pip
       - python3-yaml
       - git
+      - dbus
     state: present
   notify: reboot

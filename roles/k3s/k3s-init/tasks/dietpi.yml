@@ -1,0 +1,15 @@
+---
+- name: Installing iptables
+  apt:
+    name: iptables
+    state: present
+    update-cache: true
+  register: iptables_installation
+
+- name: Flush iptables before changing to iptables-legacy
+  iptables:
+    flush: true
+  when: iptables_installation.changed
+
+- name: Flush Handlers
+  meta: flush_handlers
