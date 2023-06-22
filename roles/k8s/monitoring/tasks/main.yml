@@ -33,6 +33,17 @@
     create_namespace: yes
     release_values: "{{ lookup('file', '../files/prometheus-vars.yml') | from_yaml }}"
 
+- name: Ensure to create the needed certs
+  community.kubernetes.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: monitoring
+    definition: "{{ lookup('template', '../../../../shared/generate-secret-from-op.yml.j2') }}"
+    validate:
+      fail_on_error: yes
+  with_items:
+    - {"secret_name": "grafana-credentials", "item_id": "3grf2gm2fw77xopkbjo4y7tsbe"}
+
 - name: Ensure the grafana helm repo is available
   community.kubernetes.helm_repository:
     name: grafana

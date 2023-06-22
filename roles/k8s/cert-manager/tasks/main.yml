@@ -3,16 +3,17 @@
   debug:
     msg: >-
       'my_mail' is required. Add the following to the playbook run:
-      -e "{\"my_mail\": $(op item get fxwpqrzpncksdezymgzp6i7fbm --fields label=email)}"'
+      -e "{\"my_mail\": $(op item get fxwpqrzpncksdezymgzp6i7fbm --fields label=email)}"
   failed_when: my_mail is not defined
 
 - name: Create the cert-manager k8s namespace
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
-    name: cert-manager
+    state: present
     api_version: v1
     kind: Namespace
-    state: present
+    name: cert-manager
+
 
 # - name: Download the CRD cert manager resource yaml
 #   get_url:
@@ -49,6 +50,8 @@
 - name: Make sure the cert-manager cluster-issuer is deployed
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    api_version: v1
     definition: "{{ lookup('template', '../templates/cluster-issuer.yml') }}"
     state: present
     namespace: cert-manager

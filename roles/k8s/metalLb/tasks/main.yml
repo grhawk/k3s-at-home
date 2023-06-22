@@ -45,8 +45,8 @@
       spec:
         addresses:
           - 10.1.10.100/32  # masters LB
-          - 10.1.10.200/32  # nginx LB
-          - 10.1.10.201/32  # pihole
+          - 10.1.10.205/32  # nginx LB
+          - 10.1.10.206/32  # pihole
         autoassign: false
 
 - name: Create the L2Advertisement for metalLb
