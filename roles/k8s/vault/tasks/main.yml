@@ -1,5 +1,5 @@
 ---
-- name: Fail when my_var is not defined
+- name: Fail when op_credentials or op_token are not defined
   debug:
     msg: >-
       'op_credentials and op-token are required. Add the following to the playbook run:
@@ -15,7 +15,7 @@
     update: yes
     depth: 1
 
-- name: Ensure the nginx/stable helm repo is available
+- name: Ensure the 1password helm repo is available
   kubernetes.core.helm_repository:
     name: 1password
     repo_url: https://1password.github.io/connect-helm-charts
