@@ -4,9 +4,9 @@ persistence:
   type: pvc
   size: 5Gi
 
-annotations:
-  operator.1password.io/item-path: "vaults/2pywcio4vfcenxsetefzmjpb6q/items/3grf2gm2fw77xopkbjo4y7tsbe"
-  operator.1password.io/item-name: "grafana-credentials"
+# annotations:
+#   operator.1password.io/item-path: "vaults/2pywcio4vfcenxsetefzmjpb6q/items/3grf2gm2fw77xopkbjo4y7tsbe"
+#   operator.1password.io/item-name: "grafana-credentials"
 
 sidecar:
   dashboards:
@@ -15,7 +15,7 @@ sidecar:
     label: grafana_dashboard
     labelValue: 1
   datasources:
-    enabled: true
+    enabled: false
     searchNamespace: monitoring
     label: grafana_datasource
     labelValue: 1
@@ -38,9 +38,22 @@ ingress:
     nginx.ingress.kubernetes.io/auth-realm: Authentication Required - foo
 
   hosts:
-    - grafana.riccardopetraglia.me
+    - grafana.petraglia.tech
 
   tls:
     - hosts:
-        - grafana.riccardopetraglia.me
+        - grafana.petraglia.tech
       secretName: grafana-tls
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-prometheus.monitoring.svc.cluster.local:9090
+        isDefault: false
+      - name: Loki
+        type: loki
+        url: http://loki.monitoring.svc.cluster.local:3100
+        isDefault: true

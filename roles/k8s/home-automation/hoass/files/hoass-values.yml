@@ -45,7 +45,7 @@ image:
   # -- image repository
   repository: homeassistant/home-assistant
   # -- image tag
-  tag: 2022.7.6
+  tag: "2023.6"
   # -- image pull policy
   pullPolicy: IfNotPresent
 
@@ -71,7 +71,7 @@ ingress:
       kubernetes.io/ingress.class: nginx
       cert-manager.io/cluster-issuer: letsencrypt-prod
     hosts:
-      - host: hoass.riccardopetraglia.me
+      - host: home.petraglia.tech
         paths:
           - path: /
             service:
@@ -80,7 +80,7 @@ ingress:
     tls:
       - secretName: hoaas-tls
         hosts:
-          - hoass.riccardopetraglia.me
+          - home.petraglia.tech
 
 # -- Enable devices to be discoverable
 # hostNetwork: true
