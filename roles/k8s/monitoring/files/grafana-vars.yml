@@ -4,9 +4,9 @@ persistence:
   type: pvc
   size: 5Gi
 
-# annotations:
-#   operator.1password.io/item-path: "vaults/2pywcio4vfcenxsetefzmjpb6q/items/3grf2gm2fw77xopkbjo4y7tsbe"
-#   operator.1password.io/item-name: "grafana-credentials"
+annotations:
+  operator.1password.io/item-path: "vaults/2pywcio4vfcenxsetefzmjpb6q/items/3grf2gm2fw77xopkbjo4y7tsbe"
+  operator.1password.io/item-name: "grafana-credentials"
 
 sidecar:
   dashboards:
