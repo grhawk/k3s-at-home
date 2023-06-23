@@ -15,7 +15,7 @@
     create_namespace: yes
     wait: yes
     timeout: 600s
-    release_values: "{{ lookup('file', '../files/metalLb-values.yml') | from_yaml }}"
+    release_values: "{{ lookup('template', '../templates/metalLb-values.yml.j2') | from_yaml }}"
   notify: check_kube_api
 
 - name: Create the IpAddressPool config map default (~ 10.1.10.250/28)
@@ -44,9 +44,9 @@
         name: special-lb-pool
       spec:
         addresses:
-          - 10.1.10.100/32  # masters LB
-          - 10.1.10.200/32  # nginx LB
-          - 10.1.10.201/32  # pihole
+          - "{{ k3s.kube_api_lb_ip }}/32"  # masters LB
+          - "{{ nginx.ingress_lb_ip }}/32"  # nginx LB
+          - 10.1.10.206/32  # pihole
         autoassign: false
 
 - name: Create the L2Advertisement for metalLb

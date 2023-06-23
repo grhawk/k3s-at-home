@@ -6,3 +6,5 @@ disable:
   - servicelb
   - local-storage
 write-kubeconfig-mode: 644
+tls-san:
+  - "{{ k3s.kube_api_lb_ip }}"

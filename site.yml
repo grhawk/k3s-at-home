@@ -37,6 +37,11 @@
   roles:
     - role: k3s/k3s-init
     - role: k3s/main_master
+    - role: k8s/helm
+    - role: k8s/vault
+    - role: k8s/longhorn
+    - role: k8s/metalLb
+
 
 - hosts: secondary_masters
   # This cannot really be done alone since we need the token from the previous
