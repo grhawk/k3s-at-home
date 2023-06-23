@@ -15,5 +15,5 @@
     create_namespace: yes
     wait: yes
     wait_timeout: 600s
-    release_values: "{{ lookup('templates', '../templates/nginx-values.yml.j2') | from_yaml }}"
+    release_values: "{{ lookup('template', '../templates/nginx-values.yml.j2') | from_yaml }}"
   notify: check_kube_api
