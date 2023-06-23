@@ -4,7 +4,7 @@
   become: yes
   roles:
     - role: common
-      tags: ['common', 'k3s-install']
+      tags: ['common', 'k3s-install', 'k3s-add-nodes']
     # - role: cifs-mount
     #   tags: ['k8s', 'backup-partition', 'cifs']
 
@@ -26,14 +26,16 @@
 - hosts: k8s_nodes
   gather_facts: yes
   become: yes
-  tags: ['k3s-install', 'k8s-common']
+  tags: ['k3s-install', 'k8s-common', 'k3s-add-nodes']
+  environment:
+    - INSTALL_K3S_VERSION: "{{ k3s.version }}"
   roles:
     - role: k3s/common
 
 - hosts: main_master
   gather_facts: yes
   become: yes
-  tags: ['k3s-install']
+  tags: ['k3s-install', 'k3s-add-nodes']
   roles:
     - role: k3s/k3s-init
     - role: k3s/main_master
@@ -54,8 +56,10 @@
     - role: k3s/secondary-masters
 
 - hosts: workers
+  # This cannot really be done alone since we need the token from the previous
+  # role.
   become: yes
-  tags: ['k3s-install']
+  tags: ['k3s-install', 'k3s-add-nodes']
   roles:
     - role: k3s/k3s-init
     - role: k3s/node
