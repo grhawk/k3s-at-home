@@ -1,5 +1,4 @@
 ---
-
 - name: Ensure helm key is installed
   apt_key:
     url: https://baltocdn.com/helm/signing.asc
