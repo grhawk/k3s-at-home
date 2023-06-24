@@ -1,0 +1,25 @@
+---
+- name: Ensure the k8s-at-home helm repo is available
+  community.kubernetes.helm_repository:
+    name: k8s-at-home
+    repo_url: https://k8s-at-home.com/charts/
+    state: present
+
+- name: Create the namespace dns-system
+  community.kubernetes.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: dns-system
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Ensure adguard is installed
+  kubernetes.core.helm:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: adguard
+    chart_ref: k8s-at-home/adguard-home
+    release_namespace: dns-system
+    release_state: present
+    create_namespace: yes
+    wait: no
+    release_values: "{{ lookup('file', '../files/adguard-values.yml') | from_yaml }}"
