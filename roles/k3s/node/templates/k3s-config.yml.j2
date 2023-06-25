@@ -1,3 +1,10 @@
 ---
 server: "https://{{ k3s.kube_api_lb_ip | default('10.1.10.100')  }}:6443"
 token: "{{ hostvars[groups['main_master'][0]]['token'] | b64decode | regex_replace('\n', '') }}"
+disable:
+  - traefik
+  - servicelb
+  - local-storage
+write-kubeconfig-mode: 644
+tls-san:
+  - "{{ k3s.kube_api_lb_ip }}"
