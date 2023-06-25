@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: node-red
-  namespace: node-red
+  namespace: home-automation
   labels:
     app.kubernetes.io/instance: node-red
     app.kubernetes.io/managed-by: Helm
@@ -12,7 +12,7 @@ metadata:
     helm.sh/chart: node-red-10.0.0
   annotations:
     meta.helm.sh/release-name: node-red
-    meta.helm.sh/release-namespace: node-red
+    meta.helm.sh/release-namespace: home-automation
 spec:
   replicas: 1
   selector:

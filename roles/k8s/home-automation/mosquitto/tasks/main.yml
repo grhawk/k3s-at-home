@@ -5,10 +5,10 @@
     repo_url: https://grhawk.github.io/charts/
     state: present
 
-- name: Create the namespace hoass
+- name: Create the namespace home-automation
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
-    name: hoass
+    name: home-automation
     api_version: v1
     kind: Namespace
     state: present
@@ -17,7 +17,7 @@
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    namespace: hoass
+    namespace: home-automation
     definition: "{{ lookup('template', '../../../../shared/generate-secret-from-op.yml.j2') }}"
     validate:
       fail_on_error: yes
@@ -31,7 +31,7 @@
     update_repo_cache: true
     name: mosquitto
     chart_ref: my_k8s-at-home/mosquitto
-    release_namespace: hoass
+    release_namespace: home-automation
     release_state: present
     create_namespace: yes
     wait: no

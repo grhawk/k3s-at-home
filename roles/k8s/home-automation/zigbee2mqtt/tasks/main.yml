@@ -4,7 +4,7 @@
     msg: >-
       'mqtt_username' and 'mqtt_password' are required. Add the following to the playbook run:
       -e "{"mqtt_username": "$(op item get 3gjbzmqksledyacuo2h253w7tu --fields label=mosquitto-username)",
-      "mqtt_password": "$(op item get 3gjbzmqksledyacuo2h253w7tu --fields label=mosquitto-username)"}"'
+      "mqtt_password": "$(op item get 3gjbzmqksledyacuo2h253w7tu --fields label=mosquitto-username)"}"
   failed_when: mqtt_username is not defined or mqtt_password is not defined
 
 - name: Ensure the k8s-at-home helm repo is available
@@ -13,10 +13,10 @@
     repo_url: https://grhawk.github.io/charts/
     state: present
 
-- name: Create the namespace hoass
+- name: Create the namespace home-automation
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
-    name: hoass
+    name: home-automation
     api_version: v1
     kind: Namespace
     state: present
@@ -25,7 +25,7 @@
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    namespace: hoass
+    namespace: home-automation
     definition: "{{ lookup('template', '../../../../shared/generate-secret-from-op.yml.j2') }}"
     validate:
       fail_on_error: yes
@@ -39,7 +39,7 @@
     update_repo_cache: true
     name: zigbee2mqtt
     chart_ref: my_k8s-at-home/zigbee2mqtt
-    release_namespace: hoass
+    release_namespace: home-automation
     release_state: present
     create_namespace: yes
     wait: no

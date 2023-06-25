@@ -39,11 +39,15 @@ env:
 # @default -- See values.yaml
 service:
   main:
-    type: NodePort
+    type: LoadBalancer
+    annotations:
+      metallb.universe.tf/address-pool: default-lb-pool
+      metallb.universe.tf/ip-allocated-from-pool: default-lb-pool
+      metallb.universe.tf/loadBalancerIPs: 10.1.10.253
     ports:
       http:
-        port: 8080
-        nodePort: 30101
+        port: 80
+        targetPort: 8080
 
 ingress:
   # -- Enable and configure ingress settings for the chart under this key.
@@ -89,7 +93,7 @@ config:
     # MQTT base topic for zigbee2mqtt MQTT messages
     base_topic: zigbee2mqtt
     # MQTT server URL
-    server: "mqtts://mosquitto.hoass.svc.cluster.local:8883"
+    server: "mqtts://mosquitto.home-automation.svc.cluster.local:8883"
     # MQTT server authentication, uncomment if required:
     user: "{{ mqtt_username }}"
     password: "{{ mqtt_password }}"
@@ -115,7 +119,9 @@ config:
     # adapter: deconz
 
   advanced:
-    network_key: GENERATE
+    pan_id: 0x1a83
+    channel: 11
+    network_key: "{{ zigbee2mqtt.network_key }}"
     log_output:
       - console
     log_level: info

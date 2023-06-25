@@ -5,10 +5,10 @@
     repo_url: https://k8s-at-home.com/charts/
     state: present
 
-- name: Create the namespace hoass
+- name: Create the namespace home-automation
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
-    name: hoass
+    name: home-automation
     api_version: v1
     kind: Namespace
     state: present

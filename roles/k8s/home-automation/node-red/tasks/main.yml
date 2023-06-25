@@ -10,7 +10,7 @@
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     name: node-red
     chart_ref: k8s-at-home/node-red
-    release_namespace: node-red
+    release_namespace: home-assistant
     release_state: present
     create_namespace: yes
     wait: no

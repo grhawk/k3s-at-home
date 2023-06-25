@@ -1,6 +1,6 @@
 ---
 ingress_name: hoass
-namespace: hoass
-host: hoass.riccardopetraglia.me
+namespace: home-automation
+host: home.petraglia.tech
 service: home-assistant
 port: 80

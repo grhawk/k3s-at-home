@@ -55,4 +55,4 @@ data:
 kind: ConfigMap
 metadata:
   name: toolscripts
-  namespace: hoass
+  namespace: home-automation
