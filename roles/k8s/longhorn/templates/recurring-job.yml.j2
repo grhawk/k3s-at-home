@@ -9,9 +9,9 @@ spec:
   task: "{{ job.task }}"
   groups:
 {% for group in job['groups'] %}
-      - group
+      - {{ group }}
 {% endfor %}
-  retain: 12
+  retain: "{{ job.retain }}"
   concurrency: 2
   labels:
     job-name: "{{ job.name }}"

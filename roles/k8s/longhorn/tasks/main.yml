@@ -51,15 +51,37 @@
         path: /spec/type
         value: LoadBalancer
 
-- name: recurring backup every day for default group
+- name: recurring backup every day for default group - set facts
   set_fact:
     job:
       name: "default-backup"
-      cron_schedule: ""
+      cron_schedule: "12 0/12 * * *"
       task: "backup"
+      retain: 12
       groups:
         - default
+
+- name: recurring backup every day for default group - set apply
   community.kubernetes.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition: "{{ lookup('template', 'recurring-job.yml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+
+- name: recurring backup every day for default group - set facts
+  set_fact:
+    job:
+      name: "important-backup"
+      cron_schedule: "42 0/6* * *"
+      task: "backup"
+      retain: 8
+      groups:
+        - important
+
+- name: recurring backup every day for default group - set apply
+  community.kubernetes.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
     definition: "{{ lookup('template', 'recurring-job.yml.j2') | from_yaml }}"
     validate:
