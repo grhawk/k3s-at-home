@@ -50,3 +50,17 @@
       - op: replace
         path: /spec/type
         value: LoadBalancer
+
+- name: recurring backup every day for default group
+  set_fact:
+    job:
+      name: "default-backup"
+      cron_schedule: ""
+      task: "backup"
+      groups:
+        - default
+  community.kubernetes.k8s:
+    state: present
+    definition: "{{ lookup('template', 'recurring-job.yml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes

@@ -1,0 +1,17 @@
+---
+apiVersion: longhorn.io/v1beta1
+kind: RecurringJob
+metadata:
+  name: "{{ job.name }}"
+  namespace: longhorn-system
+spec:
+  cron: "{{ job.cron_schedule }}"
+  task: "{{ job.task }}"
+  groups:
+{% for group in job['groups'] %}
+      - group
+{% endfor %}
+  retain: 12
+  concurrency: 2
+  labels:
+    job-name: "{{ job.name }}"
