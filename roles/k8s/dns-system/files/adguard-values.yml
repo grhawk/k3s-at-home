@@ -61,24 +61,39 @@ args:
 
 # -- Configures service settings for the chart.
 # @default -- See values.yaml
+#
 service:
   main:
     primary: true
-    type: LoadBalancer
-    annotations:
-      metallb.universe.tf/address-pool: special-lb-pool
-      metallb.universe.tf/ip-allocated-from-pool: special-lb-pool
-      metallb.universe.tf/loadBalancerIPs: 10.1.10.206
     ports:
       http:
-        port: 80
-        protocol: TCP
-        targetPort: 3000
+        port: 3000
       dns-tcp:
         enabled: true
         port: 53
         protocol: TCP
         targetPort: 53
+      dns-udp:
+        enabled: true
+        port: 53
+        protocol: UDP
+        targetPort: 53
+    externalTrafficPolicy: Local
+
+  dns-tcp:
+    enabled: false
+    type: NodePort
+    ports:
+      dns-tcp:
+        enabled: true
+        port: 53
+        protocol: TCP
+        targetPort: 53
+    externalTrafficPolicy: Local
+  dns-udp:
+    enabled: false
+    type: NodePort
+    ports:
       dns-udp:
         enabled: true
         port: 53
