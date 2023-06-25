@@ -26,6 +26,27 @@
     release_state: present
     create_namespace: yes
     wait: yes
-    wait_timeout: 600s
+    wait_timeout: 1200s
     release_values: "{{ lookup('file', '../files/values.yml') | from_yaml }}"
   notify: check_kube_api
+
+- name: update Longhorn UI service
+  tags: [update-longhorn]
+  kubernetes.core.k8s_json_patch:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    kind: Service
+    namespace: longhorn-system
+    name: longhorn-frontend
+    patch:
+      - op: add
+        path: /metadata/annotations/metallb.universe.tf~1address-pool
+        value: default-lb-pool
+      - op: add
+        path: /metadata/annotations/metallb.universe.tf~1ip-allocated-from-pool
+        value: default-lb-pool
+      - op: add
+        path: /metadata/annotations/metallb.universe.tf~1loadBalancerIPs
+        value: 10.1.10.254
+      - op: replace
+        path: /spec/type
+        value: LoadBalancer
