@@ -192,6 +192,8 @@ config: |
     - domain: zigbeeadapter.home
       answer: 10.1.100.10
     - domain: zigbee2mqtt.home
+      answer: 10.1.10.253
+    - domain: longhorn.home
       answer: 10.1.10.254
     rewrites: []
     blocked_services: []
