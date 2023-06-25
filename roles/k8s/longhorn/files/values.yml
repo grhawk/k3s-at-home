@@ -17,12 +17,13 @@ persistence:
   defaultClassReplicaCount: 3
   reclaimPolicy: Delete
   recurringJobSelector:
-    enable: true
-    jobList: []
+    enable: false
+    jobList:
   backingImage:
-    enable: true
+    enable: false
 
 
 defaultSettings:
   backupTarget: nfs://10.1.10.101:/mnt/external
-  defaultReplicaCount: 2
+  defaultReplicaCount: 3
+  allowRecurringJobWhileVolumeDetached: true

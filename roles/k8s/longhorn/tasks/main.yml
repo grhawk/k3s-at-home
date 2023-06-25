@@ -29,3 +29,17 @@
     wait_timeout: 600s
     release_values: "{{ lookup('file', '../files/values.yml') | from_yaml }}"
   notify: check_kube_api
+
+- name: recurring backup every day for default group
+  set_fact:
+    job:
+      name: "default-backup"
+      cron_schedule: ""
+      task: "backup"
+      groups:
+        - default
+  community.kubernetes.k8s:
+    state: present
+    definition: "{{ lookup('template', 'recurring-job.yml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
