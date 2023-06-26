@@ -102,6 +102,10 @@
   debug:
     msg: "{{ lookup('template', '../templates/kubeapi-ep.yml.j2') }}"
 
+- name: Pause for 5 minutes to make sure everything is ready
+  ansible.builtin.pause:
+    minutes: 5
+
 - name: Create the kubeapi-lb endpoint
   kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
