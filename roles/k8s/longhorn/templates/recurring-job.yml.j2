@@ -8,10 +8,10 @@ spec:
   cron: "{{ job.cron_schedule }}"
   task: "{{ job.task }}"
   groups:
-{% for group in job['groups'] %}
-      - {{ group }}
-{% endfor %}
-  retain: "{{ job.retain }}"
+{%- for group in job['groups'] %}
+    - {{ group }}
+{%- endfor %}
+  retain: {{ job.retain }}
   concurrency: 2
   labels:
     job-name: "{{ job.name }}"
