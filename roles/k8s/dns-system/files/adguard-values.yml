@@ -65,6 +65,11 @@ args:
 service:
   main:
     primary: true
+    type: LoadBalancer
+    annotations:
+      metallb.universe.tf/address-pool: special-lb-pool
+      metallb.universe.tf/ip-allocated-from-pool: special-lb-pool
+      metallb.universe.tf/loadBalancerIPs: 10.1.10.206
     ports:
       http:
         port: 3000
