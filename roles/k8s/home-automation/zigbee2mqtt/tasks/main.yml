@@ -33,7 +33,7 @@
     - {"secret_name": "zigbee2mqtt-secrets", "item_id": "3gjbzmqksledyacuo2h253w7tu"}
     - {"secret_name": "zigbee2mqtt-ca-crt", "item_id": "rpczvdrrosedxyvg4ufzjajxbe"}
 
-- name: Ensure app-daemon is installed
+- name: Ensure zigbee2mqtt is installed
   kubernetes.core.helm:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     update_repo_cache: true
