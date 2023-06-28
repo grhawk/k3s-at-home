@@ -46,7 +46,7 @@ additionalPrometheusRulesMap:
 alertmanager:
   config:
     global:
-      slack_api_url: '<url>'
+      slack_api_url: "http://null.org"
       smtp_from: you@gmail.com
       smtp_smarthost: mailhog:1025
       smtp_require_tls: false
@@ -101,7 +101,7 @@ alertmanager:
       # Apply inhibition if the alertname is the same.
       equal: ['alertname', 'namespace']
 
-#  tplConfig: true
+  tplConfig: false
 
   templateFiles:
     slack_template.tmpl: |-
