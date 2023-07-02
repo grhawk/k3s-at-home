@@ -62,6 +62,46 @@ args:
 # -- Configures service settings for the chart.
 # @default -- See values.yaml
 #
+ingress:
+  main:
+    enabled: true
+    annotations:
+      nginx.org/websocket-services: adguard-adguard-home
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+      nginx.ingress.kubernetes.io/auth-realm: Authentication Required - foo
+      nginx.ingress.kubernetes.io/auth-secret: basic-auth
+      nginx.ingress.kubernetes.io/auth-type: basic
+    hosts:
+      - host: dns.petraglia.tech
+        paths:
+          - path: /
+            service:
+              name: adguard-adguard-home
+              port: 3000
+    tls:
+      - secretName: dns-manager-tls
+        hosts:
+          - dns.petraglia.tech
+  doh:
+    enabled: true
+    annotations:
+      nginx.org/websocket-services: adguard-adguard-home
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    hosts:
+      - host: dns.petraglia.tech
+        paths:
+          - path: /dns-query
+            service:
+              name: adguard-adguard-home
+              port: 8443
+    tls:
+      - secretName: dns-doh-tls
+        hosts:
+          - dns.petraglia.tech
+
 service:
   main:
     primary: true
@@ -200,25 +240,111 @@ config: |
       answer: 10.1.10.253
     - domain: longhorn.home
       answer: 10.1.10.254
-    rewrites: []
     blocked_services: []
     upstream_timeout: 10s
     private_networks: []
     use_private_ptr_resolvers: true
     local_ptr_upstreams: []
   tls:
-    enabled: false
-    server_name: ""
+    enabled: true
+    server_name: dns.petraglia.tech
     force_https: false
-    port_https: 443
+    port_https: 8443
     port_dns_over_tls: 853
     port_dns_over_quic: 853
     port_dnscrypt: 0
     dnscrypt_config_file: ""
-    allow_unencrypted_doh: false
+    allow_unencrypted_doh: true
     strict_sni_check: false
-    certificate_chain: ""
-    private_key: ""
+    certificate_chain: |
+      -----BEGIN CERTIFICATE-----
+      MIIE8TCCA9mgAwIBAgISBBAlj5b6RUzcelK1/PsJIJILMA0GCSqGSIb3DQEBCwUA
+      MDIxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQD
+      EwJSMzAeFw0yMzA2MjkyMDE1MjVaFw0yMzA5MjcyMDE1MjRaMB0xGzAZBgNVBAMT
+      EmRucy5wZXRyYWdsaWEudGVjaDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+      ggEBAKXfgpDf9KDdKocMR5rpiXRGovgNaQz3ogLcO6zvi3x5o9agF6NqpQ1AnyqR
+      bwLgGKBXCZMOPrVhPnt7nX6WQI31z4bPXAIEGrsgQOyRVEAX5cTWShVoR7gm1WGR
+      z6gREHoYzm0PAoyz561buzYmjvH8na5TVXkHm2S1oe1Q1+KScDjhMv0ExAIhy4J4
+      msfr6w4Io1bBlveiyvJxsezuvqJQs5pSMOwZZjzLQrcFvtCWvRnpL+OLVrvH9B/A
+      VYXNj3ozErXI6K7P17Zas8k+oamTjJvjMdP/3MutX7J6fxTTW06FBEJMW3K9v4nI
+      O7aSQjbhfOCGPKfeasEkKvbqUC0CAwEAAaOCAhQwggIQMA4GA1UdDwEB/wQEAwIF
+      oDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDAYDVR0TAQH/BAIwADAd
+      BgNVHQ4EFgQUAZPkHpGTDsr4Hyjo6ZEjIsJ1zaEwHwYDVR0jBBgwFoAUFC6zF7dY
+      VsuuUAlA5h+vnYsUwsYwVQYIKwYBBQUHAQEESTBHMCEGCCsGAQUFBzABhhVodHRw
+      Oi8vcjMuby5sZW5jci5vcmcwIgYIKwYBBQUHMAKGFmh0dHA6Ly9yMy5pLmxlbmNy
+      Lm9yZy8wHQYDVR0RBBYwFIISZG5zLnBldHJhZ2xpYS50ZWNoMBMGA1UdIAQMMAow
+      CAYGZ4EMAQIBMIIBBAYKKwYBBAHWeQIEAgSB9QSB8gDwAHYAejKMVNi3LbYg6jjg
+      Uh7phBZwMhOFTTvSK8E6V6NS61IAAAGJCQLL5AAABAMARzBFAiEA5mnDslAELYHi
+      hnVvO4NL+qMlHWcesHX94N1UZmZ+jT8CIEgLe4tk/bAGMUpTQmKx4QjieFJrnbLy
+      rzxFnYgp8rKoAHYA6D7Q2j71BjUy51covIlryQPTy9ERa+zraeF3fW0GvW4AAAGJ
+      CQLMBgAABAMARzBFAiASXFZCTvluFl9MKZE6lzHJJnQhc06aXlOBQ3dDiVFU+wIh
+      ANvKfY/PbG4gGJx0pRcHxW2J3+FNTSXJGUg/r9O4WxyWMA0GCSqGSIb3DQEBCwUA
+      A4IBAQBIqUxy5u5IsN8Gz3Ev0zcukv/w0C0opsWmsFdM+l/lr3JSxaLK2uwD/c61
+      dL/mIs+AIBge4efgSz5Kn4sHonWhuu2a68c1cYgueH2/jpu41b30hsKBexE3r6kh
+      uNwE/crhYRXEZb4fpCC15E13RLrn4GnxEGfK63vkWQS3FJz31ealxjnMIZkitT9t
+      XT85oRk3hadVxZgyLBIheryGkKn8FEXZ8Llq/0mnp/a8W9yXp1jQINn20t/fU7ig
+      ztUbLcYtbr1tdAKWW4iYMh5fxcxoD7MB2AKOCSY6Kmq/SD+4tw7D+bFSLUfE8a5N
+      gcoF/u7oYY/JF7mmRdIlmxsbX09e
+      -----END CERTIFICATE-----
+      -----BEGIN CERTIFICATE-----
+      MIIFFjCCAv6gAwIBAgIRAJErCErPDBinU/bWLiWnX1owDQYJKoZIhvcNAQELBQAw
+      TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh
+      cmNoIEdyb3VwMRUwEwYDVQQDEwxJU1JHIFJvb3QgWDEwHhcNMjAwOTA0MDAwMDAw
+      WhcNMjUwOTE1MTYwMDAwWjAyMQswCQYDVQQGEwJVUzEWMBQGA1UEChMNTGV0J3Mg
+      RW5jcnlwdDELMAkGA1UEAxMCUjMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+      AoIBAQC7AhUozPaglNMPEuyNVZLD+ILxmaZ6QoinXSaqtSu5xUyxr45r+XXIo9cP
+      R5QUVTVXjJ6oojkZ9YI8QqlObvU7wy7bjcCwXPNZOOftz2nwWgsbvsCUJCWH+jdx
+      sxPnHKzhm+/b5DtFUkWWqcFTzjTIUu61ru2P3mBw4qVUq7ZtDpelQDRrK9O8Zutm
+      NHz6a4uPVymZ+DAXXbpyb/uBxa3Shlg9F8fnCbvxK/eG3MHacV3URuPMrSXBiLxg
+      Z3Vms/EY96Jc5lP/Ooi2R6X/ExjqmAl3P51T+c8B5fWmcBcUr2Ok/5mzk53cU6cG
+      /kiFHaFpriV1uxPMUgP17VGhi9sVAgMBAAGjggEIMIIBBDAOBgNVHQ8BAf8EBAMC
+      AYYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMBIGA1UdEwEB/wQIMAYB
+      Af8CAQAwHQYDVR0OBBYEFBQusxe3WFbLrlAJQOYfr52LFMLGMB8GA1UdIwQYMBaA
+      FHm0WeZ7tuXkAXOACIjIGlj26ZtuMDIGCCsGAQUFBwEBBCYwJDAiBggrBgEFBQcw
+      AoYWaHR0cDovL3gxLmkubGVuY3Iub3JnLzAnBgNVHR8EIDAeMBygGqAYhhZodHRw
+      Oi8veDEuYy5sZW5jci5vcmcvMCIGA1UdIAQbMBkwCAYGZ4EMAQIBMA0GCysGAQQB
+      gt8TAQEBMA0GCSqGSIb3DQEBCwUAA4ICAQCFyk5HPqP3hUSFvNVneLKYY611TR6W
+      PTNlclQtgaDqw+34IL9fzLdwALduO/ZelN7kIJ+m74uyA+eitRY8kc607TkC53wl
+      ikfmZW4/RvTZ8M6UK+5UzhK8jCdLuMGYL6KvzXGRSgi3yLgjewQtCPkIVz6D2QQz
+      CkcheAmCJ8MqyJu5zlzyZMjAvnnAT45tRAxekrsu94sQ4egdRCnbWSDtY7kh+BIm
+      lJNXoB1lBMEKIq4QDUOXoRgffuDghje1WrG9ML+Hbisq/yFOGwXD9RiX8F6sw6W4
+      avAuvDszue5L3sz85K+EC4Y/wFVDNvZo4TYXao6Z0f+lQKc0t8DQYzk1OXVu8rp2
+      yJMC6alLbBfODALZvYH7n7do1AZls4I9d1P4jnkDrQoxB3UqQ9hVl3LEKQ73xF1O
+      yK5GhDDX8oVfGKF5u+decIsH4YaTw7mP3GFxJSqv3+0lUFJoi5Lc5da149p90Ids
+      hCExroL1+7mryIkXPeFM5TgO9r0rvZaBFOvV2z0gp35Z0+L4WPlbuEjN/lxPFin+
+      HlUjr8gRsI3qfJOQFy/9rKIJR0Y/8Omwt/8oTWgy1mdeHmmjk7j1nYsvC9JSQ6Zv
+      MldlTTKB3zhThV1+XWYp6rjd5JW1zbVWEkLNxE7GJThEUG3szgBVGP7pSWTUTsqX
+      nLRbwHOoq7hHwg==
+      -----END CERTIFICATE-----
+    private_key: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCl34KQ3/Sg3SqH
+      DEea6Yl0RqL4DWkM96IC3Dus74t8eaPWoBejaqUNQJ8qkW8C4BigVwmTDj61YT57
+      e51+lkCN9c+Gz1wCBBq7IEDskVRAF+XE1koVaEe4JtVhkc+oERB6GM5tDwKMs+et
+      W7s2Jo7x/J2uU1V5B5tktaHtUNfiknA44TL9BMQCIcuCeJrH6+sOCKNWwZb3osry
+      cbHs7r6iULOaUjDsGWY8y0K3Bb7Qlr0Z6S/ji1a7x/QfwFWFzY96MxK1yOiuz9e2
+      WrPJPqGpk4yb4zHT/9zLrV+yen8U01tOhQRCTFtyvb+JyDu2kkI24Xzghjyn3mrB
+      JCr26lAtAgMBAAECggEAaG5Q+L9Xd9Pmy4Gqr1hrJt62Ce//fJ+Hy782fwmNyz+W
+      LDE80LD6214dF6LavneyaXiC2af1SSLBQOMx5Bna6MWi86AnsEk/PyLuXUKeRYAG
+      NCgqGlI+HS2t2DECCTE9K3HkvPrfQxCdQyLmuhAKnUXLTI7A2GM2rXBBU3U7hjRi
+      XN+nJtlo68DXCoqCTwwfW5SDsxgixxpRWns+IZyxdP34fXMt4IBSjxQPpZJyPsNF
+      XlrazTd3pL+oULbPhcyEl/lugLyCz4bgrYnqcrgcvGqyPdpcQaTDOuMhOEPHHqvd
+      4jCemPeUdT/L7edtk6kDpwTOWxCoE5DdoNswTx6eLQKBgQDXxIq7JqbH9rlfxV7a
+      JLwVE4YqiCno/Fg2/YLYD2KoXAEc3BQDUNO+eeZ7SUuP20beZmGODB0++LGmRNS7
+      UZl3vF9Q15xxCsDWR4yUl0j0c82G8f4XL9sBriJbV9F2dCyYJMb3N2UMspTMf6fq
+      Ud9Uyyrs7h5Wtzcbnux2L8VzfwKBgQDEzUvjsqatQo9ypeSIMt889HYOHlOLKs3X
+      fJ0MYFsVjPn3DTCWpiwH3wugYvZJYasyriSb4O776L1jbPJKC6BdB33vW4cGAcWb
+      MBZcHlTnu6GC5WwnmieeHz88WLGJnUa7utXjvHj41tqmDqDgX5OeOKd7txKyy7Z/
+      DVDrevEiUwKBgQDILb4P98IQDuTY54IinKYqX5y/5OgNEeC90+EKluuPCxy1K7Ed
+      imWIeAvPIacK5gMP3qhvYunXPF+ExKMgzom1PnynwgGQFsvlgSf5y4mR0cZChkyY
+      MnvbSTTyzby1Sv78gFJflXMYnq3SNDUS/bZXMs62VgyrovtrkrwKwjNL/QKBgAjW
+      a0UDXcbECWsNlhCjsDCtjaueowPJ3UqC9w56OTzjgsocVoU9WxbTZlNCfmrXLvfs
+      qAoz9KdtUSvo1YyLrxzeXEJmas7TP4tzgl2Koydw3pThNpUksAjCwHU2SmqynF2L
+      y1UZvpj2FQWF/KV2xUtCogrFMtrCmSRlda/NaoyvAoGAOGxTPI8/tY0x35DqWT2L
+      mLUmRDA9SAXXg0y8IWudQJeHFYx+QY+OzoOxHZui89U23kIyOlg9lZSHPRGj/TlM
+      /iZkjzn1DczwJmJf8CAutmnb4Ar0VbKmUJYvR/a6XtRUiwLcFoEuH9RUWQGqv/9r
+      zOiZNRX/ZcXMW611M8XAt8U=
+      -----END PRIVATE KEY-----
     certificate_path: ""
     private_key_path: ""
   filters:
@@ -230,8 +356,13 @@ config: |
     url: https://adaway.org/hosts.txt
     name: AdAway Default Blocklist
     id: 2
+  - enabled: true
+    url: https://github.com/ppfeufer/adguard-filter-list/blob/master/blocklist?raw=true
+    name: 'list of lists: https://github.com/ppfeufer/adguard-filter-list'
+    id: 1687851771
   whitelist_filters: []
-  user_rules: []
+  user_rules:
+  - '@@||fonts.gstatic.com^$ # recommended by list of lists'
   dhcp:
     enabled: false
     interface_name: ""
