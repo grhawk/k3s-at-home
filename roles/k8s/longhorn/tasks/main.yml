@@ -61,15 +61,21 @@
       groups:
         - default
 
+- name: recurring backup every day for default group - debug
+  debug:
+    msg: "{{ lookup('template', 'recurring-job.yml.j2') }}"
+
+
+
 - name: recurring backup every day for default group - set apply
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    definition: "{{ lookup('template', 'recurring-job.yml.j2') | from_yaml }}"
+    definition: "{{ lookup('template', 'recurring-job.yml.j2') }}"
     validate:
       fail_on_error: yes
 
-- name: recurring backup every day for default group - set facts
+- name: recurring backup every day for important group - set facts
   set_fact:
     job:
       name: "important-backup"
@@ -79,10 +85,14 @@
       groups:
         - important
 
-- name: recurring backup every day for default group - set apply
+- name: recurring backup every day for important group - debug
+  debug:
+    msg: "{{ lookup('template', 'recurring-job.yml.j2') }}"
+
+- name: recurring backup every day for important group - set apply
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    definition: "{{ lookup('template', 'recurring-job.yml.j2') | from_yaml }}"
+    definition: "{{ lookup('template', 'recurring-job.yml.j2') }}"
     validate:
       fail_on_error: yes

@@ -8,9 +8,9 @@ spec:
   cron: "{{ job.cron_schedule }}"
   task: "{{ job.task }}"
   groups:
-{%- for group in job['groups'] %}
+{% for group in job['groups'] %}
     - {{ group }}
-{%- endfor %}
+{% endfor %}
   retain: {{ job.retain }}
   concurrency: 2
   labels:
