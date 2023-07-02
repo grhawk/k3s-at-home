@@ -26,7 +26,7 @@
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     name: home-assistant
     chart_ref: k8s-at-home/home-assistant
-    release_namespace: hoass
+    release_namespace: home-automation
     release_state: present
     create_namespace: yes
     wait: no
