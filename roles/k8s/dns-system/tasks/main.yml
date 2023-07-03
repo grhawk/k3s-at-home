@@ -13,6 +13,12 @@
     kind: Namespace
     state: present
 
+- name: Make sure the basic-auth secret is in the namespace
+  community.kubernetes.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition: "{{ lookup('template', '../../../shared/basic-auth.yml.j2') | from_yaml }}"
+#
 - name: Ensure adguard is installed
   kubernetes.core.helm:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
