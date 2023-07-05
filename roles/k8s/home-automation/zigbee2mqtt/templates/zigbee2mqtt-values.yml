@@ -60,9 +60,9 @@ securityContext:
 # -- Configure persistence settings for the chart under this key.
 # @default -- See values.yaml
 persistence:
-  # config:
-  #   enabled: true
-  #   mountPath: /data
+  config:
+    enabled: true
+    mountPath: /app/data
 
   clientcrt:
     enabled: true
@@ -109,6 +109,9 @@ config:
     # Optional: Include device information to mqtt messages (default: false)
     include_device_information: true
 
+  # Check if a device is in a power off state
+  availability: true
+
   # USB / Serial settings
   serial:
     port: "tcp://{{ zigbee_coordinator }}:6638"
@@ -140,9 +143,9 @@ config:
     # possible values are: disable (default), ISO_8601, ISO_8601_local, epoch (default: disable)
     last_seen: 'ISO_8601_local'
 
-    # homeassistant:
-    #   discovery_topic: 'homeassistant'
-    #   status_topic: 'homeassistant/status'
+    homeassistant:
+      discovery_topic: 'homeassistant'
+      status_topic: 'homeassistant/status'
 
     # Optional: Enables report feature (see information -> report for more details) (default: false)
     # report: true
