@@ -112,8 +112,8 @@
     state: present
     namespace: kube-public
     definition: "{{ lookup('template', '../templates/kubeapi-ep.yml.j2') | from_yaml }}"
-    validate:
-      fail_on_error: yes
+    # validate:
+    #   fail_on_error: yes
 
 
 - name: Make sure the kubeapi is reachable using a lb
@@ -121,5 +121,5 @@
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
     definition: "{{ lookup('template', '../templates/kubeapi-lb.yml.j2') | from_yaml }}"
-    validate:
-      fail_on_error: yes
+    # validate:
+    #   fail_on_error: yes

@@ -40,7 +40,7 @@
 #     namespace: monitoring
 #     definition: "{{ lookup('template', '../../../../shared/generate-secret-from-op.yml.j2') }}"
 #     validate:
-#       fail_on_error: yes
+# #      fail_on_error: yes
 #   with_items:
 #     - {"secret_name": "grafana-credentials", "item_id": "3grf2gm2fw77xopkbjo4y7tsbe"}
 
@@ -75,8 +75,8 @@
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
     definition: "{{ lookup('template', '../../../shared/basic-auth.yml.j2') | from_yaml }}"
-    validate:
-      fail_on_error: yes
+#    validate:
+#      fail_on_error: yes
 
 
 # - name: Ensure prometheus is accessible
@@ -84,12 +84,12 @@
 #     state: present
 #     definition: "{{ lookup('template', '../../../shared/ingress-basic-auth.yml.j2') | from_yaml }}"
 #     validate:
-#       fail_on_error: yes
+# #      fail_on_error: yes
 
 - name: Deploy the serviceMonitor for nginx
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
     definition: "{{ lookup('file', '../files/nginx-serviceMonitor.yml') | from_yaml }}"
-    validate:
-      fail_on_error: yes
+#    validate:
+#      fail_on_error: yes

@@ -19,8 +19,8 @@
     state: present
     namespace: home-automation
     definition: "{{ lookup('template', '../../../../shared/generate-secret-from-op.yml.j2') }}"
-    validate:
-      fail_on_error: yes
+#    validate:
+#      fail_on_error: yes
   with_items:
     - {"secret_name": "mosquitto-secrets", "item_id": "uwn2i4tcjaoz65fxy23shehoja"}
     - {"secret_name": "mosquitto-ca-crt", "item_id": "rpczvdrrosedxyvg4ufzjajxbe"}

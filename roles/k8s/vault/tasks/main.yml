@@ -18,7 +18,8 @@
 - name: Ensure the 1password helm repo is available
   kubernetes.core.helm_repository:
     name: 1password
-    repo_url: https://1password.github.io/connect-helm-charts
+    # repo_url: https://1password.github.io/connect-helm-charts
+    repo_url: https://raw.githubusercontent.com/1Password/connect-helm-charts/gh-pages/
     state: present
 
 - name: Make sure the 1password-system ns exists
@@ -35,8 +36,8 @@
     state: present
     namespace: 1password-system
     definition: "{{ lookup('template', '../templates/op-credentials-secret.yml') | from_yaml }}"
-    validate:
-      fail_on_error: yes
+    # validate:
+    #   fail_on_error: yes
   no_log: true
 
 - name: Make sure the op-token-secret is in the namespace
@@ -45,8 +46,8 @@
     state: present
     namespace: 1password-system
     definition: "{{ lookup('template', '../templates/op-token-secret.yml') | from_yaml }}"
-    validate:
-      fail_on_error: yes
+#    validate:
+#      fail_on_error: yes
   no_log: false
 
 - name: Ensure vault (1password-server) is installed

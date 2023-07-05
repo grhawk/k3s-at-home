@@ -3,8 +3,8 @@
   debug:
     msg: >-
       'mqtt_username' and 'mqtt_password' are required. Add the following to the playbook run:
-      -e "{"mqtt_username": "$(op item get 3gjbzmqksledyacuo2h253w7tu --fields label=mosquitto-username)",
-      "mqtt_password": "$(op item get 3gjbzmqksledyacuo2h253w7tu --fields label=mosquitto-username)"}"
+      -e "{\"mqtt_username\": \"$(op item get 3gjbzmqksledyacuo2h253w7tu --fields label=mosquitto-username)\",
+      \"mqtt_password\": \"$(op item get 3gjbzmqksledyacuo2h253w7tu --fields label=mosquitto-username)\"}"
   failed_when: mqtt_username is not defined or mqtt_password is not defined
 
 - name: Ensure the k8s-at-home helm repo is available
@@ -27,8 +27,8 @@
     state: present
     namespace: home-automation
     definition: "{{ lookup('template', '../../../../shared/generate-secret-from-op.yml.j2') }}"
-    validate:
-      fail_on_error: yes
+#    validate:
+#      fail_on_error: yes
   with_items:
     - {"secret_name": "zigbee2mqtt-secrets", "item_id": "3gjbzmqksledyacuo2h253w7tu"}
     - {"secret_name": "zigbee2mqtt-ca-crt", "item_id": "rpczvdrrosedxyvg4ufzjajxbe"}

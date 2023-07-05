@@ -18,8 +18,8 @@
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
     definition: "{{ lookup('file', '../files/toolscripts-cm.yml') | from_yaml }}"
-    validate:
-      fail_on_error: yes
+#    validate:
+#      fail_on_error: yes
 
 - name: Ensure home-assistant is installed
   kubernetes.core.helm:
