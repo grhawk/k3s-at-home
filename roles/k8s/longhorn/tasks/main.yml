@@ -79,7 +79,7 @@
   set_fact:
     job:
       name: "important-backup"
-      cron_schedule: "42 0/6* * *"
+      cron_schedule: "42 */6 * * *"
       task: "backup"
       retain: 8
       groups:
