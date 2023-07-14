@@ -71,9 +71,9 @@
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    definition: "{{ lookup('template', 'recurring-job.yml.j2') }}"
-#    validate:
-#      fail_on_error: yes
+    definition: "{{ lookup('template', 'recurring-job.yml.j2') | from_yaml }}"
+    # validate:
+    #   fail_on_error: yes
 
 - name: recurring backup every day for important group - set facts
   set_fact:
@@ -93,6 +93,6 @@
   community.kubernetes.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    definition: "{{ lookup('template', 'recurring-job.yml.j2') }}"
+    definition: "{{ lookup('template', 'recurring-job.yml.j2') | from_yaml }}"
 #    validate:
 #      fail_on_error: yes

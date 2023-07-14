@@ -36,6 +36,8 @@
     state: present
     namespace: 1password-system
     definition: "{{ lookup('template', '../templates/op-credentials-secret.yml') | from_yaml }}"
+#    validate:
+#      fail_on_error: yes
     # validate:
     #   fail_on_error: yes
   no_log: true
