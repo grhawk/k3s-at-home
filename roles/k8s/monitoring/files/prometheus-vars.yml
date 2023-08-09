@@ -123,23 +123,56 @@ alertmanager:
 
   ingress:
     enabled: false
+
+  service:
     annotations:
-      kubernetes.io/ingress.class: nginx
-      cert-manager.io/cluster-issuer: letsencrypt-staging
-      nginx.ingress.kubernetes.io/auth-type: basic
-      nginx.ingress.kubernetes.io/auth-secret: basic-auth
-      nginx.ingress.kubernetes.io/auth-realm: Authentication Required - foo
+      metallb.universe.tf/address-pool: default-lb-pool
+      metallb.universe.tf/ip-allocated-from-pool: default-lb-pool
+      metallb.universe.tf/loadBalancerIPs: 10.1.10.252
+    ## Port for Alertmanager Service to listen on
+    ##
+    port: 80
+    ## To be used with a proxy extraContainer port
+    ##
+    targetPort: 9093
+    ## Port to expose on each node
+    ## Only used if service.type is 'NodePort'
+    ##
+    nodePort: 30903
+    ## List of IP addresses at which the Prometheus server service is available
+    ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+    ##
 
-    hosts:
-      - monitoring.riccardopetraglia.me
-    paths:
-      - /alertmanager
-    pathType: Prefix
+    ## Additional ports to open for Alertmanager service
+    additionalPorts: []
+    # additionalPorts:
+    # - name: authenticated
+    #   port: 8081
+    #   targetPort: 8081
 
-    tls:
-      - secretName: alertmanager-general-tls
-        hosts:
-          - monitoring.riccardopetraglia.me
+    externalIPs: []
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+
+    ## Denotes if this Service desires to route external traffic to node-local or cluster-wide endpoints
+    ##
+    externalTrafficPolicy: Cluster
+
+    ## If you want to make sure that connections from a particular client are passed to the same Pod each time
+    ## Accepts 'ClientIP' or ''
+    ##
+    sessionAffinity: ""
+
+    ## Service type
+    ##
+    type: LoadBalancer
+
+
+
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+    maxUnavailable: ""
 
   alertmanagerSpec:
     replicas: 2
@@ -185,10 +218,50 @@ prometheus:
         cpu: 100m
         memory: 2Gi
       # priorityClassName: high-priority
-#
-#  service:
-#    sessionAffinity: "ClientIP"
-#
+
+  service:
+    annotations:
+      metallb.universe.tf/address-pool: default-lb-pool
+      metallb.universe.tf/ip-allocated-from-pool: default-lb-pool
+      metallb.universe.tf/loadBalancerIPs: 10.1.10.251
+    ## Port for Alertmanager Service to listen on
+    ##
+    port: 80
+    ## To be used with a proxy extraContainer port
+    ##
+    targetPort: 9090
+    ## Port to expose on each node
+    ## Only used if service.type is 'NodePort'
+    ##
+    nodePort: 30900
+    ## List of IP addresses at which the Prometheus server service is available
+    ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+    ##
+
+    ## Additional ports to open for Alertmanager service
+    additionalPorts: []
+    # additionalPorts:
+    # - name: authenticated
+    #   port: 8081
+    #   targetPort: 8081
+
+    externalIPs: []
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+
+    ## Denotes if this Service desires to route external traffic to node-local or cluster-wide endpoints
+    ##
+    externalTrafficPolicy: Cluster
+
+    ## If you want to make sure that connections from a particular client are passed to the same Pod each time
+    ## Accepts 'ClientIP' or ''
+    ##
+    sessionAffinity: ""
+
+    ## Service type
+    ##
+    type: LoadBalancer
+
 
 ## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
 ##
