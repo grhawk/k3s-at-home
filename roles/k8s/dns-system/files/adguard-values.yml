@@ -247,6 +247,10 @@ config: |
       answer: 10.1.10.253
     - domain: longhorn.home
       answer: 10.1.10.254
+    - domain: prometheus.home
+      answer: 10.1.10.251
+    - domain: alertmanager.home
+      answer: 10.1.10.252
     blocked_services: []
     upstream_timeout: 10s
     private_networks: []
@@ -363,13 +367,16 @@ config: |
     url: https://adaway.org/hosts.txt
     name: AdAway Default Blocklist
     id: 2
-  - enabled: true
+  - enabled: false
     url: https://github.com/ppfeufer/adguard-filter-list/blob/master/blocklist?raw=true
     name: 'list of lists: https://github.com/ppfeufer/adguard-filter-list'
     id: 1687851771
   whitelist_filters: []
   user_rules:
   - '@@||fonts.gstatic.com^$ # recommended by list of lists'
+  - '@@||clickserve.dartsearch.net^$important'
+  - '@@||graph.facebook.com^$important'
+  - ""
   dhcp:
     enabled: false
     interface_name: ""
