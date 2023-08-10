@@ -51,7 +51,7 @@ datasources:
     datasources:
       - name: Prometheus
         type: prometheus
-        url: http://prometheus-prometheus.monitoring.svc.cluster.local:9090
+        url: http://10.1.10.251
         isDefault: false
       - name: Loki
         type: loki
