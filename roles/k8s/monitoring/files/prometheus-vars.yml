@@ -20,7 +20,7 @@ defaultRules:
   create: true
   rules:
     kubeProxy: false
-    kubelet: false
+    kubelet: true
 
 additionalPrometheusRulesMap:
   rule-name:
@@ -170,7 +170,7 @@ alertmanager:
 
 
   podDisruptionBudget:
-    enabled: true
+    enabled: false
     minAvailable: 1
     maxUnavailable: ""
 
