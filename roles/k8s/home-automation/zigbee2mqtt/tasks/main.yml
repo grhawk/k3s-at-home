@@ -42,5 +42,6 @@
     release_namespace: home-automation
     release_state: present
     create_namespace: yes
+    force: yes
     wait: no
     release_values: "{{ lookup('template', '../templates/zigbee2mqtt-values.yml') | from_yaml }}"
