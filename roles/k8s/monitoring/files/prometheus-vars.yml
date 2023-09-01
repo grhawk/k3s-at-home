@@ -60,7 +60,10 @@ alertmanager:
       routes:
         - match:
             severtiy: info
-          receiver: null
+          receiver: 'null'
+        - match:
+            alertname: InfoInhibitor
+          receiver: 'null'
         # capture All WARN to the 'warning' with P3
         - match:
             alertname: Watchdog
@@ -213,10 +216,10 @@ prometheus:
     resources:
       limits:
         cpu: "2"
-        memory: 4Gi
+        memory: 4.5Gi
       requests:
-        cpu: 100m
-        memory: 2Gi
+        cpu: 700m
+        memory: 3.2Gi
       # priorityClassName: high-priority
 
   service:
