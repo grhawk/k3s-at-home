@@ -10,6 +10,26 @@ controller:
     operator.1password.io/item-path: "vaults/2pywcio4vfcenxsetefzmjpb6q/items/cmbjsiyrr3ikghwieb5wjekqea"
     operator.1password.io/item-name: "appdaemon-token"
 
+initContainers:
+# -- Configures an initContainer that copies the configmap to the AdGuardHome conf directory
+# It does NOT overwrite when the file already exists.
+# @default -- See values.yaml
+  copy-configmap:
+    image: alpine/git
+    imagePullPolicy: IfNotPresent
+    command:
+      - "sh"
+      - "-c"
+      - |
+        if [ ! -f /conf ]; then
+          rm -rf /conf
+          git clone https://github.com/grhawk/HomeAssistant-AppDaemon.git /conf
+        fi
+    volumeMounts:
+      - name: config
+        mountPath: /conf
+    securityContext:
+      runAsUser: 0
 
 image:
   # -- image repository
