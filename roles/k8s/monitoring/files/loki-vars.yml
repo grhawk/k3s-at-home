@@ -23,3 +23,53 @@ loki:
             relabel_configs:
               - source_labels: ['__journal__systemd_unit']
                 target_label: 'unit'
+
+promtail:
+  enabled: true
+  config:
+    logLevel: info
+    serverPort: 3101
+    clients:
+      - url: http://{{ .Release.Name }}:3100/loki/api/v1/push
+    snippets:
+    # #10154, https://github.com/grafana/helm-charts/blob/main/charts/promtail/README.md#journald-support
+      extraScrapeConfigs: |
+        # Add an additional scrape config for syslog
+        - job_name: journal
+          journal:
+            path: /run/log/journal
+            max_age: 12h
+            labels:
+              job: systemd-journal
+          relabel_configs:
+            - source_labels:
+                - __journal__hostname
+              target_label: hostname
+
+            # example label values: kubelet.service, containerd.service
+            - source_labels:
+                - __journal__systemd_unit
+              target_label: unit
+
+            # example label values: debug, notice, info, warning, error
+            - source_labels:
+                - __journal_priority_keyword
+              target_label: level
+
+  extraVolumes:
+  # #10154, https://github.com/grafana/helm-charts/blob/main/charts/promtail/README.md#journald-support
+  - name: journal
+    hostPath:
+      path: /run/log/journal
+  - name: machine-id
+    hostPath:
+      path: /etc/machine-id
+
+  extraVolumeMounts:
+  # #10154, https://github.com/grafana/helm-charts/blob/main/charts/promtail/README.md#journald-support
+  - name: journal
+    mountPath: /run/log/journal
+    readOnly: true
+  - name: machine-id
+    mountPath: /etc/machine-id
+    readOnly: true
