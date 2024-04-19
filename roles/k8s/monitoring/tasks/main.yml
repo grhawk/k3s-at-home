@@ -60,6 +60,16 @@
     create_namespace: yes
     release_values: "{{ lookup('file', '../files/loki-vars.yml') | from_yaml }}"
 
+- name: Ensure FSGroupPolicy is set correctly for loki - https://longhorn.io/kb/troubleshooting-volume-take-long-time-to-mount/
+  kubernetes.core.k8s_json_patch:
+    kind: statefulset
+    namespace: monitoring
+    name: loki
+    patch:
+      - op: add
+        path: /spec/template/spec/securityContext/fsGroupChangePolicy
+        value: OnRootMismatch
+
 - name: Install grafana
   community.kubernetes.helm:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
